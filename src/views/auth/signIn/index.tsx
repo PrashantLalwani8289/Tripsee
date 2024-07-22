@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {useDispatch} from 'react-redux'
 import { NavLink } from "react-router-dom";
 import {
   Box,
@@ -11,7 +12,7 @@ import {
   Icon,
   Input,
   InputGroup,
-  InputRightElement,
+  InputRightElement,  
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
@@ -21,6 +22,14 @@ import illustration from "assets/img/auth/auth.png";
 import { FcGoogle } from "react-icons/fc";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
+import {useForm, Controller} from "react-hook-form"
+import { ILoginSchema } from "Interface/authInterface";
+import { yupResolver } from '@hookform/resolvers/yup';
+import { mode } from '@chakra-ui/theme-tools';
+import { loginSchema } from "ValidationSchema/Auth";
+import { login } from "services/authService";
+import { toastMessageError, toastMessageSuccess } from "components/utilities/CommonToastMessages";
+import { setUser } from "State Management/Actions/rootReducer";
 
 type ButtonStyle = { bg: string };
 
@@ -33,6 +42,7 @@ function SignIn() {
   const googleBg = useColorModeValue("secondaryGray.300", "whiteAlpha.200");
   const googleText = useColorModeValue("navy.700", "white");
 
+  const dispatch = useDispatch();
   const googleHover: ButtonStyle = useColorModeValue(
     { bg: "gray.200" },
     { bg: "whiteAlpha.300" }
@@ -44,6 +54,27 @@ function SignIn() {
 
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
+
+  const { control, handleSubmit } = useForm<ILoginSchema>({
+    mode:"onChange",
+    resolver: yupResolver(loginSchema())
+  });
+
+  const onDataSubmit = async (data : ILoginSchema) => {
+    console.log(data)
+    const response = await login(data);
+    if(response.success){
+      console.log(response)
+      toastMessageSuccess("login successful")
+      console.log(response.data.user)
+      dispatch(setUser(response.data.user))
+      
+    }else{
+      // Display error message
+      toastMessageError("login failed")
+    } 
+    
+  }
 
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
@@ -103,43 +134,60 @@ function SignIn() {
             </Text>
             <HSeparator />
           </Flex>
+          <form onSubmit={handleSubmit(onDataSubmit)}>
+
+
           <FormControl>
             <FormLabel display="flex" ms="4px" fontSize="sm" fontWeight="500" color={textColor} mb="8px">
               Email<Text color={brandStars}>*</Text>
             </FormLabel>
-            <Input
-              isRequired={true}
-              variant="auth"
-              fontSize="sm"
-              ms={{ base: "0px", md: "0px" }}
-              type="email"
-              placeholder="mail@simmmple.com"
-              mb="24px"
-              fontWeight="500"
-              size="lg"
-            />
+            <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    isRequired
+                    variant="auth"
+                    fontSize="sm"
+                    ms={{ base: "0px", md: "0px" }}
+                    type="email"
+                    placeholder="mail@simmmple.com"
+                    mb="24px"
+                    fontWeight="500"
+                    size="lg"
+                  />
+                )}
+              />
             <FormLabel ms="4px" fontSize="sm" fontWeight="500" color={textColor} display="flex">
               Password<Text color={brandStars}>*</Text>
             </FormLabel>
             <InputGroup size="md">
-              <Input
-                isRequired={true}
-                fontSize="sm"
-                placeholder="Min. 8 characters"
-                mb="24px"
-                size="lg"
-                type={show ? "text" : "password"}
-                variant="auth"
-              />
-              <InputRightElement display="flex" alignItems="center" mt="4px">
-                <Icon
-                  color={textColorSecondary}
-                  _hover={{ cursor: "pointer" }}
-                  as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
-                  onClick={handleClick}
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      isRequired
+                      fontSize="sm"
+                      placeholder="Min. 8 characters"
+                      mb="24px"
+                      size="lg"
+                      type={show ? "text" : "password"}
+                      variant="auth"
+                    />
+                  )}
                 />
-              </InputRightElement>
-            </InputGroup>
+                <InputRightElement display="flex" alignItems="center" mt="4px">
+                  <Icon
+                    color={textColorSecondary}
+                    _hover={{ cursor: "pointer" }}
+                    as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
+                    onClick={handleClick}
+                  />
+                </InputRightElement>
+              </InputGroup>
             <Flex justifyContent="space-between" align="center" mb="24px">
               <FormControl display="flex" alignItems="center">
                 <Checkbox id="remember-login" colorScheme="brandScheme" me="10px" />
@@ -153,10 +201,11 @@ function SignIn() {
                 </Text>
               </NavLink>
             </Flex>
-            <Button fontSize="sm" variant="brand" fontWeight="500" w="100%" h="50" mb="24px">
+            <Button fontSize="sm" variant="brand" fontWeight="500" w="100%" h="50" mb="24px" type="submit" name="submit ">
               Sign In
             </Button>
           </FormControl>
+                  </form>
           <Flex flexDirection="column" justifyContent="center" alignItems="start" maxW="100%" mt="0px">
             <Text color={textColorDetails} fontWeight="400" fontSize="14px">
               Not registered yet?
@@ -174,4 +223,3 @@ function SignIn() {
 }
 
 export default SignIn;
-  
