@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {useDispatch} from 'react-redux'
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Box,
   Button,
@@ -17,8 +17,6 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { HSeparator } from "components/separator/Separator";
-import DefaultAuth from "layouts/auth/Default";
-import illustration from "assets/img/auth/auth.png";
 import { FcGoogle } from "react-icons/fc";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
@@ -30,6 +28,7 @@ import { loginSchema } from "ValidationSchema/Auth";
 import { login } from "services/authService";
 import { toastMessageError, toastMessageSuccess } from "components/utilities/CommonToastMessages";
 import { setUser } from "State Management/Actions/rootReducer";
+import { ROUTES } from "constants/routes";
 
 type ButtonStyle = { bg: string };
 
@@ -39,7 +38,7 @@ function SignIn() {
   const textColorDetails = useColorModeValue("navy.700", "secondaryGray.600");
   const textColorBrand = useColorModeValue("brand.500", "white");
   const brandStars = useColorModeValue("brand.500", "brand.400");
-  const googleBg = useColorModeValue("secondaryGray.300", "whiteAlpha.200");
+  const googleBg = useColorModeValue("secondaryGray.400", "whiteAlpha.200");
   const googleText = useColorModeValue("navy.700", "white");
 
   const dispatch = useDispatch();
@@ -77,7 +76,8 @@ function SignIn() {
   }
 
   return (
-    <DefaultAuth illustrationBackground={illustration} image={illustration}>
+    <div style={{display:"flex",alignItems:"center", justifyContent:"center", gap:"5rem",width:"100%"}}>
+
       <Flex
         maxW={{ base: "100%", md: "max-content" }}
         w="100%"
@@ -195,11 +195,11 @@ function SignIn() {
                   Keep me logged in
                 </FormLabel>
               </FormControl>
-              <NavLink to="/auth/forgot-password">
+              <Link  to="/auth/forgot-password">
                 <Text color={textColorBrand} fontSize="sm" w="124px" fontWeight="500">
                   Forgot password?
                 </Text>
-              </NavLink>
+              </Link>
             </Flex>
             <Button fontSize="sm" variant="brand" fontWeight="500" w="100%" h="50" mb="24px" type="submit" name="submit ">
               Sign In
@@ -209,16 +209,17 @@ function SignIn() {
           <Flex flexDirection="column" justifyContent="center" alignItems="start" maxW="100%" mt="0px">
             <Text color={textColorDetails} fontWeight="400" fontSize="14px">
               Not registered yet?
-              <NavLink to="/auth/sign-up">
+              <Link to={ROUTES.SIGNUP}>
                 <Text color={textColorBrand} as="span" ms="5px" fontWeight="500">
                   Create an Account
                 </Text>
-              </NavLink>
+              </Link>
             </Text>
           </Flex>
         </Flex>
       </Flex>
-    </DefaultAuth>
+      {/* <img src={illustration} style={{height:"600px"}} height={12} width={800}alt="illustrations" /> */}
+      </div>
   );
 }
 

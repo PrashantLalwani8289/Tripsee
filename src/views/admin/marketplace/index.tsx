@@ -45,7 +45,7 @@ import Avatar3 from 'assets/img/avatars/avatar3.png';
 import Avatar4 from 'assets/img/avatars/avatar4.png';
 import tableDataTopCreators from 'views/admin/marketplace/variables/tableDataTopCreators'; 
 
-export default function Marketplace() {
+export default function Marketplace () {
 	// Chakra Color Mode
 	const textColor = useColorModeValue('secondaryGray.900', 'white');
 	const textColorBrand = useColorModeValue('brand.500', 'white');
