@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import {useDispatch} from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { Link } from "react-router-dom";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import {
   Box,
   Button,
@@ -12,7 +13,7 @@ import {
   Icon,
   Input,
   InputGroup,
-  InputRightElement,  
+  InputRightElement,
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
@@ -20,12 +21,12 @@ import { HSeparator } from "components/separator/Separator";
 import { FcGoogle } from "react-icons/fc";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiEyeCloseLine } from "react-icons/ri";
-import {useForm, Controller} from "react-hook-form"
-import { ILoginSchema } from "Interface/authInterface";
+import { useForm, Controller } from "react-hook-form"
+import { ILoginSchema, Token } from "Interface/authInterface";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { mode } from '@chakra-ui/theme-tools';
 import { loginSchema } from "ValidationSchema/Auth";
-import { login } from "services/authService";
+import { googleSignin, login } from "services/authService";
 import { toastMessageError, toastMessageSuccess } from "components/utilities/CommonToastMessages";
 import { setUser } from "State Management/Actions/rootReducer";
 import { ROUTES } from "constants/routes";
@@ -55,28 +56,27 @@ function SignIn() {
   const handleClick = () => setShow(!show);
 
   const { control, handleSubmit } = useForm<ILoginSchema>({
-    mode:"onChange",
+    mode: "onChange",
     resolver: yupResolver(loginSchema())
   });
 
-  const onDataSubmit = async (data : ILoginSchema) => {
+  const onDataSubmit = async (data: ILoginSchema) => {
     console.log(data)
     const response = await login(data);
-    if(response.success){
+    if (response.success) {
       console.log(response)
       toastMessageSuccess("login successful")
       console.log(response.data.user)
       dispatch(setUser(response.data.user))
-      
-    }else{
+    } else {
       // Display error message
       toastMessageError("login failed")
-    } 
-    
+    }
+
   }
 
   return (
-    <div style={{display:"flex",alignItems:"center", justifyContent:"center", gap:"5rem",width:"100%"}}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5rem", width: "100%" }}>
 
       <Flex
         maxW={{ base: "100%", md: "max-content" }}
@@ -124,8 +124,34 @@ function SignIn() {
             _active={googleActive}
             _focus={googleActive}
           >
-            <Icon as={FcGoogle} w="20px" h="20px" me="10px" />
-            Sign in with Google
+            <GoogleOAuthProvider clientId="YOUR GOOGLE CLIENT ID">
+              <GoogleLogin onSuccess={async (credentialResponse) => {
+                const credential = credentialResponse.credential;
+                try {
+                  const token : Token = {
+                    credentials : credential
+                  }
+                  const response = await googleSignin(token);
+                  if (response && response.data && response.data.success) {
+                    dispatch(setUser(response.data.user))
+                    toastMessageSuccess("login successful")
+                  }
+                  if (response && response.data && !response.data.success) {
+                    toastMessageError(response.data.message)
+                  }
+                }
+                catch (e) {
+                  toastMessageError(JSON.stringify(e))
+                }
+
+              }
+              }
+                onError={() => {
+                  toastMessageError("Failed to sign in with Google")
+                }
+                }
+              />
+            </GoogleOAuthProvider>
           </Button>
           <Flex align="center" mb="25px">
             <HSeparator />
@@ -137,11 +163,11 @@ function SignIn() {
           <form onSubmit={handleSubmit(onDataSubmit)}>
 
 
-          <FormControl>
-            <FormLabel display="flex" ms="4px" fontSize="sm" fontWeight="500" color={textColor} mb="8px">
-              Email<Text color={brandStars}>*</Text>
-            </FormLabel>
-            <Controller
+            <FormControl>
+              <FormLabel display="flex" ms="4px" fontSize="sm" fontWeight="500" color={textColor} mb="8px">
+                Email<Text color={brandStars}>*</Text>
+              </FormLabel>
+              <Controller
                 name="email"
                 control={control}
                 render={({ field }) => (
@@ -159,10 +185,10 @@ function SignIn() {
                   />
                 )}
               />
-            <FormLabel ms="4px" fontSize="sm" fontWeight="500" color={textColor} display="flex">
-              Password<Text color={brandStars}>*</Text>
-            </FormLabel>
-            <InputGroup size="md">
+              <FormLabel ms="4px" fontSize="sm" fontWeight="500" color={textColor} display="flex">
+                Password<Text color={brandStars}>*</Text>
+              </FormLabel>
+              <InputGroup size="md">
                 <Controller
                   name="password"
                   control={control}
@@ -188,24 +214,24 @@ function SignIn() {
                   />
                 </InputRightElement>
               </InputGroup>
-            <Flex justifyContent="space-between" align="center" mb="24px">
-              <FormControl display="flex" alignItems="center">
-                <Checkbox id="remember-login" colorScheme="brandScheme" me="10px" />
-                <FormLabel htmlFor="remember-login" mb="0" fontWeight="normal" color={textColor} fontSize="sm">
-                  Keep me logged in
-                </FormLabel>
-              </FormControl>
-              <Link  to="/auth/forgot-password">
-                <Text color={textColorBrand} fontSize="sm" w="124px" fontWeight="500">
-                  Forgot password?
-                </Text>
-              </Link>
-            </Flex>
-            <Button fontSize="sm" variant="brand" fontWeight="500" w="100%" h="50" mb="24px" type="submit" name="submit ">
-              Sign In
-            </Button>
-          </FormControl>
-                  </form>
+              <Flex justifyContent="space-between" align="center" mb="24px">
+                <FormControl display="flex" alignItems="center">
+                  <Checkbox id="remember-login" colorScheme="brandScheme" me="10px" />
+                  <FormLabel htmlFor="remember-login" mb="0" fontWeight="normal" color={textColor} fontSize="sm">
+                    Keep me logged in
+                  </FormLabel>
+                </FormControl>
+                <Link to="/auth/forgot-password">
+                  <Text color={textColorBrand} fontSize="sm" w="124px" fontWeight="500">
+                    Forgot password?
+                  </Text>
+                </Link>
+              </Flex>
+              <Button fontSize="sm" variant="brand" fontWeight="500" w="100%" h="50" mb="24px" type="submit" name="submit ">
+                Sign In
+              </Button>
+            </FormControl>
+          </form>
           <Flex flexDirection="column" justifyContent="center" alignItems="start" maxW="100%" mt="0px">
             <Text color={textColorDetails} fontWeight="400" fontSize="14px">
               Not registered yet?
@@ -219,7 +245,7 @@ function SignIn() {
         </Flex>
       </Flex>
       {/* <img src={illustration} style={{height:"600px"}} height={12} width={800}alt="illustrations" /> */}
-      </div>
+    </div>
   );
 }
 

@@ -31,3 +31,7 @@ export interface ISignupSchema{
     password?: string;
     confirm_password?: string;
 }
+
+export interface Token{
+    credentials?:string
+}

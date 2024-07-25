@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleOAuthProvider,GoogleLogin } from "@react-oauth/google";
 import {
     Box,
     Button,
@@ -43,7 +44,7 @@ function Signup() {
     const googleBg = useColorModeValue("secondaryGray.400", "whiteAlpha.200");
     const googleText = useColorModeValue("navy.700", "white");
 
-    const dispatch = useDispatch();
+
     const googleHover: ButtonStyle = useColorModeValue(
         { bg: "gray.200" },
         { bg: "whiteAlpha.300" }

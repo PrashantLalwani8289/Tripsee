@@ -58,4 +58,74 @@
 // ];
 
 // export default routes;
-export {}
+import React, { lazy } from "react";
+import { IconType } from 'react-icons';
+import { MdBarChart, MdPerson, MdHome, MdLock, MdOutlineShoppingCart } from 'react-icons/md';
+
+// Lazy load components
+import Dashboard from "views/admin/default";
+import NFTMarketplace from "views/admin/marketplace";
+import Profile from "views/admin/profile";
+import DataTables from "views/admin/dataTables";
+import SignInCentered from "views/auth/signIn";
+import SignUpCentered from "views/auth/signup";
+// Define RoutesType
+// interface RoutesType {
+//   name: string;
+//   layout: string;
+//   component: () => JSX.Element;
+//   icon: IconType;
+//   path: string;
+//   secondary?: boolean;
+// }
+
+
+
+const routes :RoutesType[] = [
+	{
+	  name: 'Dashboard',
+	  layout: '/admin',
+	  component: Dashboard,
+	  icon: "MdHome",
+	  path: '/dashboard',
+	},
+	{
+	  name: 'Marketplace',
+	  layout: '/admin',
+	  component: NFTMarketplace,
+	  icon: "MdOutlineShoppingCart",
+	  path: '/marketplace',
+	},
+	{
+	  name: 'Profile',
+	  layout: '/admin',
+	  component: Profile,
+	  icon: "MdPerson",
+	  path: '/profile',
+	},
+	{
+	  name: 'Data Tables',
+	  layout: '/admin',
+	  component: DataTables,
+	  icon: "MdBarChart",
+	  path: '/data-tables',
+	},
+	{
+	  name: 'Sign In',
+	  layout: '/auth',
+	  component: SignInCentered,
+	  icon: "MdLock",
+	  path: '/login',
+	  secondary: true,
+	},
+	{
+	  name: 'Sign Up',
+	  layout: '/auth',
+	  component: SignUpCentered,
+	  icon: "MdLock",
+	  path: '/signup',
+	  secondary: true,
+	},
+  ];
+  
+  export default routes;
